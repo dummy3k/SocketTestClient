@@ -54,6 +54,12 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnTest, menu_item)
         self.mnuListen = menu_item
 
+        menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Receive")
+        menu_parent.AppendItem(menu_item)
+        self.Bind(wx.EVT_MENU, self.OnReceive, menu_item)
+        self.mnuReceive = menu_item
+        self.mnuReceive.Enable(False)
+
         menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Close")
         menu_parent.AppendItem(menu_item)
         self.Bind(wx.EVT_MENU, self.OnDisconnect, menu_item)
@@ -76,6 +82,7 @@ class MainWindow(wx.Frame):
     def EnableMenus(self):
         self.mnuConnect.Enable(not self.IsConnected())
         self.mnuListen.Enable(not self.IsConnected())
+        self.mnuReceive.Enable(self.IsConnected())
         self.mnuClose.Enable(self.IsConnected())
         
     def OnTest(self, event):
@@ -83,6 +90,19 @@ class MainWindow(wx.Frame):
 
     def OnExit(self, event):
         self.Close()
+
+    def OnReceive(self, event):
+        BUFFER_SIZE = 3
+        #socket.error: [Errno 11] Resource temporarily unavailable
+        try:
+            data = self.socket.recv(BUFFER_SIZE, socket.MSG_DONTWAIT)
+            log.debug("OnReceive('%s')" % data)
+        except socket.error, ex:
+            if ex.errno == 11:
+                log.debug("OnReceive: " + str(ex))
+            else:
+                raise
+            
 
     def OnDisconnect(self, event):
         self.socket.close()
@@ -95,8 +115,6 @@ class MainWindow(wx.Frame):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((HOST, PORT))
         log.info("connected to %s:%s" % (HOST, PORT))
-        #~ data = s.recv(1024)
-        #~ s.close()
         self.EnableMenus()
 
     def OnSend(self, event):
