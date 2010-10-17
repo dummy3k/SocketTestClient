@@ -5,6 +5,7 @@ if __name__ == '__main__':
     logging.config.fileConfig("logging.conf")
 
 import wx
+import socket
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ class MainWindow(wx.Frame):
 
         menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Connect")
         menu_parent.AppendItem(menu_item)
-        self.Bind(wx.EVT_MENU, self.OnTest, menu_item)
+        self.Bind(wx.EVT_MENU, self.OnConnect, menu_item)
 
         menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Listen")
         menu_parent.AppendItem(menu_item)
@@ -57,9 +58,19 @@ class MainWindow(wx.Frame):
 
     def OnTest(self, e):
         pass
-        
+
     def OnExit(self, e):
         self.Close()
+
+    def OnConnect(self, e):
+        HOST = '127.0.0.1'
+        PORT = 12345
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((HOST, PORT))
+        s.send('Hello, world')
+        #~ data = s.recv(1024)
+        s.close()
+
         
 if __name__ == '__main__':
     log.debug("Hello");
