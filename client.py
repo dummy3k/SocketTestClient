@@ -16,6 +16,23 @@ class MainWindow(wx.Frame):
                           title="Socket Test Client", pos=pos,
                           size=(640,480), style=wx.DEFAULT_FRAME_STYLE)
         log.debug("MainWindow Init")
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        t = wx.TextCtrl(self, -1, "Test it out and see", size=(-1, -1),
+                        style=wx.TE_MULTILINE)
+        t.SetSize(t.GetBestSize())
+        sizer.Add(t, wx.EXPAND, wx.EXPAND)
+
+        t = wx.TextCtrl(self, -1, "Test it out and see", size=(-1, -1))
+        t.SetSize(t.GetBestSize())
+        sizer.Add(t, 0, wx.EXPAND)
+
+        self.SetSizer(sizer)
+        self.SetAutoLayout(True)
+        self.Layout()
+#        self.SetSize(sizer.GetMinSize())
+        
     
 if __name__ == '__main__':
     log.debug("Hello");
