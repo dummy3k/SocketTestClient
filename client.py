@@ -33,7 +33,34 @@ class MainWindow(wx.Frame):
         self.Layout()
 #        self.SetSize(sizer.GetMinSize())
         
-    
+        menuBar = wx.MenuBar()
+        self.SetMenuBar(menuBar)
+
+        menu_parent = wx.Menu()
+        menuBar.Append(menu_parent, "Socket")
+
+        menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Connect")
+        menu_parent.AppendItem(menu_item)
+        self.Bind(wx.EVT_MENU, self.OnTest, menu_item)
+
+        menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Listen")
+        menu_parent.AppendItem(menu_item)
+        self.Bind(wx.EVT_MENU, self.OnTest, menu_item)
+
+        menu_item = wx.MenuItem(menu_parent, wx.ID_SEPARATOR)
+        menu_parent.AppendItem(menu_item)
+
+        menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Exit")
+        menu_parent.AppendItem(menu_item)
+        self.Bind(wx.EVT_MENU, self.OnExit, menu_item)
+
+
+    def OnTest(self, e):
+        pass
+        
+    def OnExit(self, e):
+        self.Close()
+        
 if __name__ == '__main__':
     log.debug("Hello");
 
