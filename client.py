@@ -1,11 +1,11 @@
-import logging
-
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig("logging.conf")
 
+import logging
 import wx
 import socket
+from socket_thread import SocketThread
 
 log = logging.getLogger(__name__)
 
@@ -18,6 +18,7 @@ class MainWindow(wx.Frame):
                           size=(640,480), style=wx.DEFAULT_FRAME_STYLE)
         log.debug("MainWindow Init")
         self.socket = None
+        self.socket_thread = None
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         
@@ -54,17 +55,10 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnTest, menu_item)
         self.mnuListen = menu_item
 
-        menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Receive")
-        menu_parent.AppendItem(menu_item)
-        self.Bind(wx.EVT_MENU, self.OnReceive, menu_item)
-        self.mnuReceive = menu_item
-        self.mnuReceive.Enable(False)
-
         menu_item = wx.MenuItem(menu_parent, wx.ID_ANY, text="Close")
         menu_parent.AppendItem(menu_item)
         self.Bind(wx.EVT_MENU, self.OnDisconnect, menu_item)
         self.mnuClose = menu_item
-        self.mnuClose.Enable(False)
 
         menu_item = wx.MenuItem(menu_parent, wx.ID_SEPARATOR)
         menu_parent.AppendItem(menu_item)
@@ -73,6 +67,8 @@ class MainWindow(wx.Frame):
         menu_parent.AppendItem(menu_item)
         self.Bind(wx.EVT_MENU, self.OnExit, menu_item)
 
+        self.EnableMenus()
+        
     def IsConnected(self):
         if self.socket == None:
             return False
@@ -81,7 +77,8 @@ class MainWindow(wx.Frame):
 
     def EnableMenus(self):
         self.mnuConnect.Enable(not self.IsConnected())
-        self.mnuListen.Enable(not self.IsConnected())
+        #~ self.mnuListen.Enable(not self.IsConnected())
+        self.mnuListen.Enable(False)
         self.mnuReceive.Enable(self.IsConnected())
         self.mnuClose.Enable(self.IsConnected())
         
@@ -90,19 +87,6 @@ class MainWindow(wx.Frame):
 
     def OnExit(self, event):
         self.Close()
-
-    def OnReceive(self, event):
-        BUFFER_SIZE = 3
-        #socket.error: [Errno 11] Resource temporarily unavailable
-        try:
-            data = self.socket.recv(BUFFER_SIZE, socket.MSG_DONTWAIT)
-            log.debug("OnReceive('%s')" % data)
-        except socket.error, ex:
-            if ex.errno == 11:
-                log.debug("OnReceive: " + str(ex))
-            else:
-                raise
-            
 
     def OnDisconnect(self, event):
         self.socket.close()
@@ -116,6 +100,10 @@ class MainWindow(wx.Frame):
         self.socket.connect((HOST, PORT))
         log.info("connected to %s:%s" % (HOST, PORT))
         self.EnableMenus()
+
+        self.socket_thread = SocketThread(self)
+        self.socket_thread.start()
+        
 
     def OnSend(self, event):
         event.Skip()
